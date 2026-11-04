@@ -18,12 +18,12 @@ const KEY_RECORDS = 'cp_records_v1';
 const KEY_SETTINGS = 'cp_settings_v1';
 
 const CLASSES = [
-  { label: 'Ótima', color: '#16a34a' },
-  { label: 'Normal', color: '#65a30d' },
-  { label: 'Normal alta', color: '#d97706' },
-  { label: 'Hipertensão estágio 1', color: '#ea580c' },
-  { label: 'Hipertensão estágio 2', color: '#dc2626' },
-  { label: 'Crise hipertensiva', color: '#7f1d1d' }
+  { label: 'Ótima', short: 'Ótima', color: '#16a34a' },
+  { label: 'Normal', short: 'Normal', color: '#65a30d' },
+  { label: 'Normal alta', short: 'Normal alta', color: '#d97706' },
+  { label: 'Hipertensão estágio 1', short: 'Estágio 1', color: '#ea580c' },
+  { label: 'Hipertensão estágio 2', short: 'Estágio 2', color: '#dc2626' },
+  { label: 'Crise hipertensiva', short: 'Crise', color: '#7f1d1d' }
 ];
 
 const pad2 = (n) => String(n).padStart(2, '0');
@@ -243,16 +243,16 @@ function readingRow(r, opts) {
   return `<div class="reading" data-id="${r.id}">
     <div class="time">${esc(r.time)}</div>
     <div class="bp">${r.sys}/${r.dia}<small> mmHg</small></div>
+    <div class="acts">
+      <button class="act" data-act="edit" title="Editar" aria-label="Editar">✏️</button>
+      <button class="act del" data-act="del" title="Excluir" aria-label="Excluir">🗑</button>
+    </div>
     <div class="meta">
       <span class="badge ${r.period}">${PERIOD_LABEL[r.period] || ''}</span>
       ${opts.showDate ? `<span class="badge" style="background:#f3f4f6;color:#4b5563">${fmtDate(r.date)}</span>` : ''}
       ${r.pulse ? `<span class="badge" style="background:#f3f4f6;color:#4b5563">${r.pulse} bpm</span>` : ''}
-      <span class="badge" style="background:${c.color}1f;color:${c.color}">${c.label}</span>
+      <span class="badge" style="background:${c.color}1f;color:${c.color}">${c.short}</span>
       ${r.note ? `<div class="note" title="${esc(r.note)}">📝 ${esc(r.note)}</div>` : ''}
-    </div>
-    <div class="acts">
-      <button class="act" data-act="edit" title="Editar" aria-label="Editar">✏️</button>
-      <button class="act del" data-act="del" title="Excluir" aria-label="Excluir">🗑</button>
     </div>
   </div>`;
 }
