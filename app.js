@@ -41,6 +41,43 @@ const fmt1 = (v) => (v == null || isNaN(v)) ? '—' : (Math.round(v * 10) / 10).
 const fmt0 = (v) => (v == null || isNaN(v)) ? '—' : Math.round(v).toLocaleString('pt-BR');
 const plural = (n, sing, plur) => (n === 1 ? sing : plur);
 
+/* =========================================================================
+   Ajuste de tamanho da tela — "📐 Tamanho da tela"
+   Mesma receita do app APP_COLECAO_GAMER: zoom nativo no <html>
+   (documentElement.style.zoom) — o conteúdo REFLUI como se a tela fosse
+   maior/menor, em vez de só crescer e transbordar. É preferência visual
+   POR APARELHO, guardada no localStorage (não entra no backup de dados).
+   ========================================================================= */
+const ESCALA_MIN = 80;
+const ESCALA_MAX = 150;
+const KEY_ESCALA = 'cp_escala';
+
+function escalaLida() {
+  let v = 0;
+  try { v = Number(localStorage.getItem(KEY_ESCALA)); } catch (e) { v = 0; }
+  if (!(v >= ESCALA_MIN && v <= ESCALA_MAX)) v = 100;
+  return v;
+}
+
+function aplicarEscala(v) {
+  v = Math.min(ESCALA_MAX, Math.max(ESCALA_MIN, Number(v) || 100));
+  // Em 100% o zoom fica FORA do <html>: o WebKit (iPhone/Safari) trata
+  // qualquer zoom no raiz como ancestral transformado e aí o cabeçalho
+  // fixo deixa de "grudar". Sem zoom no raiz, o padrão fica certinho.
+  if (v === 100) document.documentElement.style.removeProperty('zoom');
+  else document.documentElement.style.zoom = v / 100;
+  return v;
+}
+
+function salvarEscala(v) {
+  v = aplicarEscala(v);
+  try { localStorage.setItem(KEY_ESCALA, String(v)); } catch (e) { /* sem espaço: vale nesta sessão */ }
+  return v;
+}
+
+// Aplica já na carga, antes do primeiro desenho (evita "piscar" no tamanho errado)
+aplicarEscala(escalaLida());
+
 function avgOf(list, key) {
   const v = list.map((x) => Number(x[key])).filter((x) => !isNaN(x) && x > 0);
   return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
@@ -852,7 +889,30 @@ function bind() {
 
   // configurações
   const dlg = $('#settings-dialog');
+
+  // 📐 ajuste de tamanho da tela (mesmo ajuste do APP_COLECAO_GAMER)
+  const escalaRange = $('#escala-range');
+  const escalaVal = $('#escala-val');
+  const syncEscala = (v) => { escalaRange.value = v; escalaVal.textContent = v + '%'; };
+  syncEscala(escalaLida());
+  // ao vivo enquanto arrasta
+  escalaRange.addEventListener('input', (e) => {
+    escalaVal.textContent = aplicarEscala(e.target.value) + '%';
+  });
+  // guarda ao soltar
+  escalaRange.addEventListener('change', (e) => {
+    escalaVal.textContent = salvarEscala(e.target.value) + '%';
+  });
+  $('#escala-reset').addEventListener('click', () => {
+    syncEscala(salvarEscala(100));
+    toast('Tamanho voltando ao padrão (100%)');
+  });
+  // imprimir/PDF sempre sai no tamanho normal
+  window.addEventListener('beforeprint', () => document.documentElement.style.removeProperty('zoom'));
+  window.addEventListener('afterprint', () => aplicarEscala(escalaLida()));
+
   $('#btn-settings').addEventListener('click', () => {
+    syncEscala(escalaLida());
     $('#set-patient').value = settings.patient || '';
     $('#set-reminders').checked = !!settings.remindersEnabled;
     $('#rem-manha').value = settings.reminders.manha;

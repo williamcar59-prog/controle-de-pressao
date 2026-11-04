@@ -243,6 +243,18 @@
       <input type="text" id="set-patient" maxlength="60" placeholder="Seu nome">
     </label>
 
+    <h3>📐 Tamanho da tela</h3>
+    <div class="escala-row">
+      <span class="escala-lbl">A−</span>
+      <input type="range" id="escala-range" min="80" max="150" step="5" value="100" aria-label="Tamanho da tela">
+      <span class="escala-lbl">A+</span>
+    </div>
+    <p class="hint escala-hint">
+      <strong id="escala-val">100%</strong> — arraste para deixar o aplicativo maior ou menor neste aparelho.
+      O ajuste é por celular/PC de quem mexeu, e vale até você mudar de novo.
+    </p>
+    <button type="button" id="escala-reset" class="btn btn-mini">Voltar ao padrão (100%)</button>
+
     <h3>Lembretes das 3 aferições</h3>
     <label class="switch">
       <input type="checkbox" id="set-reminders">

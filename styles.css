@@ -267,6 +267,7 @@ tfoot td{font-weight:800;background:#fbfcfe;border-top:2px solid var(--line)}
 dialog{
   border:none;border-radius:18px;padding:20px;width:min(440px,92vw);
   box-shadow:0 24px 60px rgba(0,0,0,.3);color:var(--text);
+  max-height:88vh;overflow:auto;
 }
 dialog::backdrop{background:rgba(15,18,26,.55);backdrop-filter:blur(2px)}
 .settings-form h2{margin-bottom:6px}
@@ -274,6 +275,33 @@ dialog::backdrop{background:rgba(15,18,26,.55);backdrop-filter:blur(2px)}
 .switch input{width:20px;height:20px;accent-color:var(--primary)}
 .settings-form .field{margin-bottom:10px}
 .settings-form .hint{margin:4px 0 6px}
+
+/* ---------- 📐 Tamanho da tela (mesmo ajuste do APP_COLECAO_GAMER) ---------- */
+.escala-row{
+  display:flex;align-items:center;gap:10px;margin:6px 0 8px;
+}
+.escala-lbl{
+  font-size:.95rem;font-weight:800;color:var(--muted);user-select:none;
+}
+.escala-row input[type='range']{
+  flex:1;height:6px;border-radius:999px;background:var(--line);
+  appearance:none;-webkit-appearance:none;outline:none;cursor:pointer;
+}
+.escala-row input[type='range']::-webkit-slider-thumb{
+  -webkit-appearance:none;width:26px;height:26px;border-radius:50%;
+  background:var(--primary-2);border:3px solid #fff;cursor:pointer;
+  box-shadow:0 2px 6px rgba(0,0,0,.25);
+}
+.escala-row input[type='range']::-moz-range-thumb{
+  width:22px;height:22px;border-radius:50%;
+  background:var(--primary-2);border:3px solid #fff;cursor:pointer;
+  box-shadow:0 2px 6px rgba(0,0,0,.25);
+}
+.escala-row input[type='range']:focus-visible{
+  box-shadow:0 0 0 3px rgba(239,68,68,.35);
+}
+.escala-hint{margin:0 0 8px}
+#escala-val{color:var(--primary);font-size:1rem}
 
 /* ---------- responsivo ---------- */
 @media (max-width:420px){
