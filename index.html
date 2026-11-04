@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Controle de Pressão</title>
+<meta name="description" content="Registro e monitoramento de pressão arterial — aferições de manhã, tarde e noite com médias para o médico.">
+<meta name="theme-color" content="#b91c1c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Pressão">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="app-header no-print">
+  <div class="brand">
+    <img src="icons/icon-192.png" alt="" width="38" height="38">
+    <div>
+      <h1>Controle de Pressão</h1>
+      <p id="header-sub">&nbsp;</p>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button id="btn-install" class="btn btn-ghost hidden" type="button">Instalar app</button>
+    <button id="btn-settings" class="icon-btn" type="button" aria-label="Configurações" title="Configurações">⚙</button>
+  </div>
+</header>
+
+<nav class="tabs no-print" role="tablist" aria-label="Seções">
+  <button class="tab active" data-view="registrar" role="tab" aria-selected="true" type="button">
+    <span class="tab-ico">＋</span> Registrar
+  </button>
+  <button class="tab" data-view="historico" role="tab" aria-selected="false" type="button">
+    <span class="tab-ico">☰</span> Histórico
+  </button>
+  <button class="tab" data-view="relatorio" role="tab" aria-selected="false" type="button">
+    <span class="tab-ico">📊</span> Relatório
+  </button>
+</nav>
+
+<main>
+
+  <!-- ==================== REGISTRAR ==================== -->
+  <section id="view-registrar" class="view active">
+
+    <form id="form-reading" class="card form" novalidate>
+      <div id="edit-banner" class="edit-banner hidden">
+        <span>✏️ Editando uma aferição</span>
+        <button type="button" id="btn-cancel-edit" class="btn btn-mini">Cancelar edição</button>
+      </div>
+
+      <h2 id="form-title">Nova aferição</h2>
+
+      <div class="row-2">
+        <label class="field">
+          <span>Data</span>
+          <input type="date" id="in-date" required>
+        </label>
+        <label class="field">
+          <span>Hora</span>
+          <input type="time" id="in-time" required>
+        </label>
+      </div>
+
+      <div class="bp-inputs">
+        <label class="bp-field">
+          <span>Sistólica</span>
+          <input type="number" id="in-sys" inputmode="numeric" min="60" max="260" step="1" placeholder="120" required>
+          <small>mmHg</small>
+        </label>
+        <span class="bp-slash" aria-hidden="true">/</span>
+        <label class="bp-field">
+          <span>Diastólica</span>
+          <input type="number" id="in-dia" inputmode="numeric" min="30" max="160" step="1" placeholder="80" required>
+          <small>mmHg</small>
+        </label>
+      </div>
+
+      <div id="live-class" class="live-class" aria-live="polite"></div>
+
+      <div class="row-2">
+        <label class="field">
+          <span>Pulso <em>(opcional)</em></span>
+          <input type="number" id="in-pulse" inputmode="numeric" min="30" max="220" step="1" placeholder="70">
+        </label>
+        <label class="field">
+          <span>Período</span>
+          <select id="in-period">
+            <option value="manha">Manhã</option>
+            <option value="tarde">Tarde</option>
+            <option value="noite">Noite</option>
+          </select>
+        </label>
+      </div>
+
+      <label class="field">
+        <span>Observação <em>(opcional)</em></span>
+        <input type="text" id="in-note" maxlength="140" placeholder="ex.: após o café, remédio às 7h, tontura…">
+      </label>
+
+      <p id="form-error" class="error hidden" role="alert"></p>
+
+      <button class="btn btn-primary btn-block" type="submit" id="btn-submit">Salvar aferição</button>
+    </form>
+
+    <div class="card" id="today-card">
+      <div class="card-head">
+        <h2>Hoje</h2>
+        <span id="today-summary" class="muted"></span>
+      </div>
+      <div id="today-chips" class="chips"></div>
+      <div id="today-list" class="readings"></div>
+      <p id="today-empty" class="empty hidden">Nenhuma aferição hoje ainda. O médico pediu 3 por dia: <strong>manhã, tarde e noite</strong>.</p>
+    </div>
+
+  </section>
+
+  <!-- ==================== HISTÓRICO ==================== -->
+  <section id="view-historico" class="view">
+
+    <div class="card filters no-print">
+      <div class="row-2">
+        <label class="field">
+          <span>Período</span>
+          <select id="hist-range">
+            <option value="7">Últimos 7 dias</option>
+            <option value="14">Últimos 14 dias</option>
+            <option value="30" selected>Últimos 30 dias</option>
+            <option value="90">Últimos 90 dias</option>
+            <option value="0">Tudo</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Turno</span>
+          <select id="hist-period">
+            <option value="">Todos</option>
+            <option value="manha">Manhã</option>
+            <option value="tarde">Tarde</option>
+            <option value="noite">Noite</option>
+          </select>
+        </label>
+      </div>
+      <div class="btn-row">
+        <button type="button" id="btn-csv" class="btn">⬇ CSV</button>
+        <button type="button" id="btn-print-hist" class="btn">🖨 PDF</button>
+        <button type="button" id="btn-backup" class="btn">💾 Backup</button>
+        <label class="btn btn-file">📥 Restaurar<input type="file" id="in-restore" accept="application/json,.json" hidden></label>
+      </div>
+    </div>
+
+    <div id="hist-summary" class="card summary-card hidden"></div>
+    <div id="hist-list"></div>
+    <p id="hist-empty" class="card empty hidden">Nenhuma aferição no período selecionado.</p>
+
+  </section>
+
+  <!-- ==================== RELATÓRIO ==================== -->
+  <section id="view-relatorio" class="view">
+
+    <div class="card no-print">
+      <div class="row-2">
+        <label class="field">
+          <span>Relatório dos últimos</span>
+          <select id="rep-range">
+            <option value="7">7 dias</option>
+            <option value="14" selected>14 dias</option>
+            <option value="30">30 dias</option>
+            <option value="90">90 dias</option>
+          </select>
+        </label>
+        <div class="field field-btn">
+          <span>&nbsp;</span>
+          <button type="button" id="btn-print-report" class="btn btn-primary">🖨 Salvar PDF</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card print-only" id="print-head">
+      <h2 id="print-title">Relatório de Pressão Arterial</h2>
+      <p id="print-sub" class="muted"></p>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>Resumo geral</h2></div>
+      <div id="rep-kpis" class="kpi-grid"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>Médias por período</h2></div>
+      <div id="rep-periods"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2>Evolução diária</h2>
+        <span class="legend">
+          <i class="dot dot-sys"></i> sistólica
+          <i class="dot dot-dia"></i> diastólica
+        </span>
+      </div>
+      <div id="rep-chart" class="chart"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>Médias semanais</h2></div>
+      <div id="rep-weeks"></div>
+      <div id="rep-weekchart" class="chart"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>Classificação das aferições</h2></div>
+      <div id="rep-class"></div>
+      <p class="hint">Classificação orientativa (critérios ACC/AHA), apenas para acompanhamento. O diagnóstico é do médico.</p>
+    </div>
+
+    <div class="card print-only" id="rep-footer">
+      <p class="muted" id="rep-footer-text"></p>
+    </div>
+
+  </section>
+
+</main>
+
+<!-- lembrete em tela -->
+<div id="banner" class="banner hidden" role="status">
+  <span id="banner-text"></span>
+  <button type="button" id="banner-close" aria-label="Fechar">✕</button>
+</div>
+
+<div id="toast" class="toast hidden" role="status"></div>
+
+<!-- ==================== CONFIGURAÇÕES ==================== -->
+<dialog id="settings-dialog">
+  <form method="dialog" class="settings-form">
+    <h2>Configurações</h2>
+
+    <label class="field">
+      <span>Nome do paciente <em>(opcional, aparece no relatório)</em></span>
+      <input type="text" id="set-patient" maxlength="60" placeholder="Seu nome">
+    </label>
+
+    <h3>Lembretes das 3 aferições</h3>
+    <label class="switch">
+      <input type="checkbox" id="set-reminders">
+      <span>Ativar lembretes (manhã, tarde e noite)</span>
+    </label>
+
+    <div class="row-2">
+      <label class="field"><span>Manhã</span><input type="time" id="rem-manha"></label>
+      <label class="field"><span>Tarde</span><input type="time" id="rem-tarde"></label>
+    </div>
+    <label class="field"><span>Noite</span><input type="time" id="rem-noite"></label>
+
+    <p class="hint">Os avisos são disparados enquanto o aplicativo estiver aberto (em segundo plano também, se o navegador permitir). Para não perder nenhum, mantenha a aba aberta ou use o lembrete do relógio junto.</p>
+
+    <div class="btn-row">
+      <button type="button" id="btn-test-notify" class="btn">🔔 Testar aviso</button>
+      <button value="ok" class="btn btn-primary">Concluir</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="app.js"></script>
+</body>
+</html>
